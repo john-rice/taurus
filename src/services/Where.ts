@@ -9,8 +9,9 @@ export class Where {
 
     /**
      * Convert an Object to Lucene Query Syntax
-     * @param data The object that contains query string name value pairs
+     * @param data The object that contains query string name value pairs.
      * @return      resulting querystring
+     * NOTE: group_<unique-identifier> is used for groupings. 
      */
     static toSearchSyntax(data: any) {
         const queries: string[] = [];
@@ -18,6 +19,8 @@ export class Where {
             const value = data[key];
             if (key === 'or') {
                 queries.push(`(${Where.toSearchSyntax(value).replace(/ AND /g, ' OR ')})`);
+            } else if (key.includes('group')) {
+                queries.push(`(${Where.toSearchSyntax(value)})`);
             } else {
                 queries.push(Where.parseSearchValue(key, value));
             }
@@ -82,7 +85,6 @@ export class Where {
         } else {
             clauses.push(`${key}:${Where.writeLuceneValue(value)}`);
         }
-
         return clauses.join(' AND ');
     }
 
